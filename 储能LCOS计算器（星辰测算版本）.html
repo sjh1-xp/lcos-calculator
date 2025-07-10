@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>储能全寿命度电成本(LCOS)计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+
+        }
+        body {
+            font-family: 'Microsoft YaHei';
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+
+            font-size: 28px;
+            color: #2c3e50;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin: 20px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h3 {
+            color: #2c3e50;
+            margin: 20px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1em;
+        }
+
+        h4{
+            color: #2c3e50;
+           // margin: 20px 80px 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f4f8;
+            text-align: right;
+        }
+        .preset-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            border: 1px solid #d0e0f0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .preset-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .preset-option {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #d0e0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .preset-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+
+        .preset-option input[type="radio"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            background: #f9fbfd;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #eaeff5;
+            transition: border-color 0.3s;
+        }
+
+        .form-group label {
+            width: 280px;
+            font-weight: bold;
+            margin-right: 15px;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .unit {
+            width: 100px;
+            margin-left: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.6);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(1px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #e8f4fc, #d4e8fa);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #c5e1f9;
+        }
+
+        .result-value {
+            font-size: 42px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 15px 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .formula-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .formula-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .formula-image-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            width: 100%;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            text-align: center;
+            margin: 15px 0;
+            line-height: 1.8;
+            color: #2c3e50;
+            padding: 15px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+        }
+
+        .formula-params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .param-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+
+        .param-symbol {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .param-name {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .param-describe {
+            margin-top: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .calculation-steps {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #f9fbfd;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeff5;
+        }
+
+        .steps-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 1px solid #eee;
+        }
+
+        .step {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid #eaeff5;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .replacements-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .replacement-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .replacement-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .replacement-label {
+            min-width: 120px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .replacement-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+
+        .add-replacement-btn, .remove-replacement-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .add-replacement-btn:hover {
+            background: #2980b9;
+        }
+
+        .remove-replacement-btn {
+            background: #e74c3c;
+            margin-left: 5px;
+        }
+
+        .remove-replacement-btn:hover {
+            background: #c0392b;
+        }
+
+        .replacement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-group label, .form-group .unit {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            .form-group input {
+                width: 100%;
+            }
+
+            .preset-options {
+                flex-direction: column;
+            }
+
+            .result-value {
+                font-size: 32px;
+            }
+
+            .formula {
+                font-size: 16px;
+            }
+
+            .replacement-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .replacement-label {
+                margin-bottom: 5px;
+            }
+
+            .replacement-input {
+                margin: 5px 0;
+            }
+        }
+
+        .tech-description {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .formula-note {
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 20px;">
+           <img src="https://images.tmtpost.com/uploads/images/2023/12/d6e512f29a9d54a69115fe3fef6d27b0_1703853247.png?imageMogr2/auto-orient/strip/interlace/1/quality/85/format/jpg/thumbnail/1400x804/gravity/center/crop/!1400x804&ext=.png" alt="储能计算器" style="width: 100%; height: 300px; border-radius: 10px;">
+        </div>
+       <div class="header">
+            <h1>储能全寿命度电成本(LCOS)计算器</h1>
+            <h4>                          ——星辰测算版本</h4>
+            <p>精确计算不同储能技术的全生命周期度电成本，优化能源投资决策</p>
+        </div>
+
+              <div class="formula-container">
+            <div class="formula-header">储能LCOS计算公式</div>
+            <div class="formula-image-container">
+                <div class="formula">
+                    LCOS = [初始投资 + Σ(电力损耗现值) + Σ(运维费用现值) + Σ(更换费用现值) - 残值现值] / Σ(总放电量)
+                </div>
+                <div class="formula">
+                    其中：初始投资 = CE × Q × 10⁶ (元)
+                </div>
+                <div class="formula">
+                    电力损耗现值(分区计算容量衰减) = Σ(P<sub>c</sub> × (1-η<sub>es</sub>) × (n(t) × Q × 1000 × OEE × (1-DR × T) × DOD) / (1+r)<sup>t</sup>)
+                </div>
+                <div class="formula">
+                    运维费用现值 = Σ((CE × Q × 10⁶) × O&M(t) / (1+r)<sup>t</sup>)
+                </div>
+                <div class="formula">
+                    更换费用现值 = Σ(H × 10000 / (1+r)<sup>t<sub>h</sub></sup>)
+                </div>
+                <div class="formula">
+                    残值现值 = S × (CE × Q × 10⁶) / (1+r)<sup>T</sup>
+                </div>
+                <div class="formula">
+                    总放电量（分区计算容量衰减） = Σ(n(t) × Q × 1000 × η<sub>es</sub> × OEE × (1-T*DR) × DOD)
+                </div>
+
+                <div class="formula-note">公式中所有符号含义如下：</div>
+
+                <div class="formula-params">
+                    <div class="param-card">
+                        <div class="param-symbol">CE</div>
+                        <div class="param-name">单瓦时成本</div>
+                        <div class="param-describe">储能系统单位容量成本（元/Wh）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">pc<sub>c</sub></div>
+                        <div class="param-name">充电价格</div>
+                        <div class="param-describe">充电时的买电价格（元/kWh）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">DR</div>
+                        <div class="param-name">衰减率</div>
+                        <div class="param-describe">储能容量衰减率%</div>
+                    </div>
+
+
+                    <div class="param-card">
+                        <div class="param-symbol">T</div>
+                        <div class="param-name">系统寿命</div>
+                        <div class="param-describe">储能系统使用寿命（年）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">n(t)</div>
+                        <div class="param-name">年调用次数</div>
+                        <div class="param-describe">每年充放电循环次数（次/年）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">r</div>
+                        <div class="param-name">折现率</div>
+                        <div class="param-describe">资金时间价值的折现率%</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">O&M(t)</div>
+                        <div class="param-name">运维费用比例</div>
+                        <div class="param-describe">年度运维成本占初始投资的比例%</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">Q</div>
+                        <div class="param-name">额定充电量</div>
+                        <div class="param-describe">每次循环的放电量（MWh）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">η<sub>es</sub></div>
+                        <div class="param-name">储能系统效率</div>
+                        <div class="param-describe">储能系统整体效率%</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">S</div>
+                        <div class="param-name">系统残值百分比</div>
+                        <div class="param-describe">系统寿命结束时的剩余价值比例%</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">OEE</div>
+                        <div class="param-name">设备利用率</div>
+                        <div class="param-describe">设备实际可用时间比例%</div>
+                    </div>
+
+
+
+                    <div class="param-card">
+                        <div class="param-symbol">DOD</div>
+                        <div class="param-name">放电深度</div>
+                        <div class="param-describe">电池放电深度%</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">H</div>
+                        <div class="param-name">更换费用</div>
+                        <div class="param-describe">电芯更换费用（万元）</div>
+                    </div>
+
+                    <div class="param-card">
+                        <div class="param-symbol">t<sub>h</sub></div>
+                        <div class="param-name">更换年份</div>
+                        <div class="param-describe">更换费用发生的年份</div>
+                    </div>
+
+                     <div class="param-card">
+                        <div class="param-symbol">T_used</div>
+                        <div class="param-name">区间年份</div>
+                        <div class="param-describe">根据更换事件的年份，将整个寿命周期分成多个连续区间</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       <div class="preset-group">
+            <h3>预设配置选项:</h3>
+            <div class="preset-options">
+                <label class="preset-option">
+                    <input type="radio" name="preset" value="preset1" checked onclick="applyPreset(1)">预设1 (锂电池)
+                    <div class="tech-description">高能量密度，快速响应</div>
+                </label>
+                <label class="preset-option">
+                    <input type="radio" name="preset" value="preset2" onclick="applyPreset(2)">预设2 (全钒液流电池)
+                    <div class="tech-description">长寿命，高安全性</div>
+                </label>
+
+                <label class="preset-option">
+                    <input type="radio" name="preset" value="custom" onclick="applyPreset(0)">自定义配置
+                    <div class="tech-description">手动输入所有参数</div>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="CE">单瓦时成本 (CE)</label>
+                    <input type="number" id="CE" value="800" step="any">
+                    <div class="unit">元/Wh</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pc">充电时的买电价格 (P<sub>c</sub>)</label>
+                    <input type="number" id="pc" value="0" step="any">
+                    <div class="unit">元/kWh</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="t">系统寿命 (T)</label>
+                    <input type="number" id="t" value="25" step="1">
+                    <div class="unit">年</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nt">年调用次数 (n(t))</label>
+                    <input type="number" id="nt" value="660" step="1">
+                    <div class="unit">次/年</div>
+                </div>
+
+                 <div class="form-group">
+                    <label for="DOD">放电深度 (DOD)</label>
+                    <input type="number" id="DOD" value="90" step="any">
+                    <div class="unit">%</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="om">运维费用比例 (O&M(t))</label>
+                    <input type="number" id="om" value="25" step="any">
+                    <div class="unit">%</div>
+                </div>
+
+
+
+            </div>
+
+            <div class="form-column">
+                 <div class="form-group">
+                    <label for="Q">额定充电量 (Q)</label>
+                    <input type="number" id="Q" value="400" step="any">
+                    <div class="unit">MWh</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="n_es">储能系统效率 (η<sub>es</sub>)</label>
+                    <input type="number" id="n_es" value="85" step="any" >
+                    <div class="unit">%</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="S">系统残值百分比(S)</label>
+                    <input type="number" id="S" value="5" step="0.01">
+                    <div class="unit">%</div>
+                </div>
+
+                  <div class="form-group">
+                    <label for="r">折现率 (r)</label>
+                    <input type="number" id="r" value="4" step="any">
+                    <div class="unit">%</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="OEE">设备利用率 (OEE)</label>
+                    <input type="number" id="OEE" value="96" step="any">
+                    <div class="unit">%</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="DR">容量衰减率 (DR)</label>
+                    <input type="number" id="DR" value="85" step="any" >
+                    <div class="unit">%</div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+
+        <h2>更换电芯配置</h2>
+        <div class="replacements-container">
+            <div class="replacement-header">
+                <h3>更换事件列表</h3>
+                <button class="add-replacement-btn" onclick="addReplacement()">+ 添加更换事件</button>
+            </div>
+            <div id="replacements-list">
+                <div class="replacement-item">
+                    <span class="replacement-label">更换费用 (H)</span>
+                    <input type="number" class="replacement-input" value="3987.382856" step="any">
+                    <span class="unit">万元</span>
+
+                    <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+                    <input type="number" class="replacement-input" value="9" step="1" min="1">
+                    <span class="unit">年</span>
+
+                    <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+                </div>
+                <div class="replacement-item">
+                    <span class="replacement-label">更换费用 (H)</span>
+                    <input type="number" class="replacement-input" value="7974.765713" step="any">
+                    <span class="unit">万元</span>
+
+                    <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+                    <input type="number" class="replacement-input" value="18" step="1" min="1">
+                    <span class="unit">年</span>
+
+                    <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="calculate-btn" onclick="calculateLCOS()">计算LCOS
+            </button>
+        </div>
+
+        <div class="result">
+            <div>全寿命度电成本 (LCOS)</div>
+            <div class="result-value" id="lcos-result">0.00</div>
+            <div>元/kWh</div>
+        </div>
+       <div style="margin-top: 15px; font-size: 16px; color: #7f8c8d;">
+                计算结果基于输入参数和预设模型
+            </div>
+        </div>
+
+
+     <div class="calculation-steps">
+            <h3>详细计算步骤:</h3>
+            <div class="steps-container" id="calculation-steps">
+                <!-- 计算步骤将在这里显示 -->
+            </div>
+       </div>
+    </div>
+    <footer>
+        <p>地址：常州星辰新能源有限公司（武进区武进高新区西湖路 150 号）</p>
+        <p>©2025 浙江星辰新能科技有限公司 版权所有</p>
+        <p>浙ICP备2025152067号-1</p>
+    </footer>
+
+   <script>
+    const presets = {
+        1: { // 锂电池
+            CE: 0.8,
+            pc: 0,
+            t: 25,
+            nt: 660,
+            r: 4,
+            om: 1.5,
+            Q: 400,
+            n_es: 85,
+            S: 5,
+            OEE: 96,
+            DOD: 90,
+            DR: 2,
+            replacements: [
+                {H: 10000, t_h: 9},
+                {H: 10000, t_h: 18}
+            ]
+        },
+        2: { // 全钒液流电池
+            CE: 1,
+            pc: 0,
+            t: 25,
+            nt: 660,
+            r: 4,
+            om: 1.2,
+            Q: 400,
+            n_es: 75,
+            S:45,
+            OEE: 96,
+            DOD: 100,
+            DR: 2,
+            replacements: [
+                {H: 10000, t_h: 15}
+            ]
+        }
+    };
+
+    function addReplacement() {
+        const replacementsList = document.getElementById('replacements-list');
+        const newItem = document.createElement('div');
+        newItem.className = 'replacement-item';
+        newItem.innerHTML = `
+            <span class="replacement-label">更换费用 (H)</span>
+            <input type="number" class="replacement-input" value="0" step="any">
+            <span class="unit">万元</span>
+
+            <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+            <input type="number" class="replacement-input" value="1" step="1" min="1">
+            <span class="unit">年</span>
+
+            <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+        `;
+        replacementsList.appendChild(newItem);
+    }
+
+    function removeReplacement(btn) {
+        const item = btn.parentNode;
+        if (document.querySelectorAll('.replacement-item').length >1) {
+            item.remove();
+        } else {
+            alert('至少需要保留一个更换事件');
+        }
+    }
+
+    function applyPreset(presetId) {
+        if (presetId === 0) {
+            const fieldIds = ['CE', 'pc', 't', 'nt', 'r', 'om', 'Q', 'n_es', 'S', 'OEE', 'DOD', 'DR'];
+            fieldIds.forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('lcos-result').textContent = '0.00';
+            document.getElementById('calculation-steps').innerHTML = '';
+
+            const replacementsList = document.getElementById('replacements-list');
+            replacementsList.innerHTML = '';
+
+            const newItem = document.createElement('div');
+            newItem.className = 'replacement-item';
+            newItem.innerHTML = `
+                <span class="replacement-label">更换费用 (H)</span>
+                <input type="number" class="replacement-input" value="" step="any">
+                <span class="unit">万元</span>
+
+                <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+                <input type="number" class="replacement-input" value="" step="1" min="1">
+                <span class="unit">年</span>
+
+                <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+            `;
+            replacementsList.appendChild(newItem);
+
+            return;
+        }
+
+        const preset = presets[presetId];
+        document.getElementById('CE').value = preset.CE;
+        document.getElementById('pc').value = preset.pc;
+        document.getElementById('DR').value = preset.DR;
+        document.getElementById('t').value = preset.t;
+        document.getElementById('nt').value = preset.nt;
+        document.getElementById('r').value = preset.r;
+        document.getElementById('om').value = preset.om;
+        document.getElementById('Q').value = preset.Q;
+        document.getElementById('n_es').value = preset.n_es;
+        document.getElementById('S').value = preset.S;
+        document.getElementById('OEE').value = preset.OEE;
+        document.getElementById('DOD').value = preset.DOD;
+
+        const replacementsList = document.getElementById('replacements-list');
+        replacementsList.innerHTML = '';
+
+        if (preset.replacements && preset.replacements.length > 0) {
+            preset.replacements.forEach(replacement => {
+                const newItem = document.createElement('div');
+                newItem.className = 'replacement-item';
+                newItem.innerHTML = `
+                    <span class="replacement-label">更换费用 (H)</span>
+                    <input type="number" class="replacement-input" value="${replacement.H}" step="any">
+                    <span class="unit">万元</span>
+
+                    <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+                    <input type="number" class="replacement-input" value="${replacement.t_h}" step="1" min="1">
+                    <span class="unit">年</span>
+
+                    <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+                `;
+                replacementsList.appendChild(newItem);
+            });
+        } else {
+            const newItem = document.createElement('div');
+            newItem.className = 'replacement-item';
+            newItem.innerHTML = `
+                <span class="replacement-label">更换费用 (H)</span>
+                <input type="number" class="replacement-input" value="0" step="any">
+                <span class="unit">万元</span>
+
+                <span class="replacement-label">更换年份 (t<sub>h</sub>)</span>
+                <input type="number" class="replacement-input" value="0" step="1" min="1">
+                <span class="unit">年</span>
+
+                <button class="remove-replacement-btn" onclick="removeReplacement(this)">删除</button>
+            `;
+            replacementsList.appendChild(newItem);
+        }
+
+        calculateLCOS();
+    }
+
+    function calculateLCOS() {
+        // 获取输入参数
+        const CE = parseFloat(document.getElementById('CE').value);
+        const pc = parseFloat(document.getElementById('pc').value);
+        const DR = parseFloat(document.getElementById('DR').value);
+        const t = parseInt(document.getElementById('t').value);
+        const nt = parseInt(document.getElementById('nt').value);
+        const r = parseFloat(document.getElementById('r').value);
+        const om = parseFloat(document.getElementById('om').value);
+        const Q = parseFloat(document.getElementById('Q').value);
+        const n_es = parseFloat(document.getElementById('n_es').value);
+        const S = parseFloat(document.getElementById('S').value);
+        const OEE = parseFloat(document.getElementById('OEE').value);
+        const DOD = parseFloat(document.getElementById('DOD').value);
+
+        // 获取更换事件
+        const replacements = [];
+        const replacementItems = document.querySelectorAll('.replacement-item');
+        replacementItems.forEach(item => {
+            const H = parseFloat(item.querySelectorAll('.replacement-input')[0].value);
+            const t_h = parseInt(item.querySelectorAll('.replacement-input')[1].value);
+            if (!isNaN(H) && !isNaN(t_h)) {
+                replacements.push({H, t_h});
+            }
+        });
+
+        // 验证输入
+        if (isNaN(CE) || isNaN(pc) || isNaN(t) ||
+            isNaN(nt) || isNaN(r) || isNaN(om) || isNaN(Q) ||
+            isNaN(n_es) || isNaN(DR) || isNaN(S)|| isNaN(OEE) ||
+            isNaN(DOD)) {
+            alert("请输入所有参数的有效数值");
+            document.getElementById('lcos-result').textContent = '0.00';
+            document.getElementById('calculation-steps').innerHTML = '';
+            return;
+        }
+
+        // 转换百分比为小数
+        const DR_dec = DR / 100;
+        const r_dec = r / 100;
+        const om_dec = om / 100;
+        const n_es_dec = n_es / 100;
+        const OEE_dec = OEE / 100;
+        const DOD_dec = DOD / 100;
+        const S_dec = S / 100;
+
+        // 初始投资
+        const initialInvestment = CE * Q * 1000000; // CE(元/Wh) * Q(MWh) * 1000000(Wh/MWh)
+
+        // 获取更换年份并排序
+        const replacementYears = replacements.map(rep => rep.t_h).sort((a, b) => a - b);
+
+        // 划分区间
+        let segments = [];
+        let startYear = 1;
+
+        for (let i = 0; i < replacementYears.length; i++) {
+            const repYear = replacementYears[i];
+            segments.push({start: startYear, end: repYear - 1, type: "normal"});
+            segments.push({start: repYear, end: repYear, type: "replacement"}); // 更换年份单独作为一个区间
+            startYear = repYear + 1;
+        }
+
+        if (startYear <= t) {
+            segments.push({start: startYear, end: t, type: "normal"});
+        }
+
+        // 计算电力损耗现值和总放电量
+        let powerLossPV = 0;
+        let totalDischarge = 0;
+        let stepsHTML = '';
+        let segmentDetails = [];
+
+        // 步骤1: 初始投资
+        stepsHTML += `
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>初始投资:</strong><br> CE × Q × 10⁶ = ${CE.toFixed(2)} × ${Q} × 1,000,000 =
+                <span>${initialInvestment.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>划分寿命周期区间（基于更换事件）:</strong>
+
+        `;
+
+        // 显示区间划分
+        segments.forEach((seg, index) => {
+            stepsHTML += `<div style="margin-top: 8px;">区间${index+1}: ${seg.start}年-${seg.end}年`;
+            if (seg.type === "replacement") {
+                stepsHTML += ` (更换年份)`;
+            }
+            stepsHTML += `</div>`;
+        });
+
+        stepsHTML += `</div><div class="step"><span class="step-number">3</span><strong>计算电力损耗现值和总放电量:</strong><br> `;
+
+       // 计算每个区间的电力损耗和放电量
+    segments.forEach((seg, segIndex) => {
+        stepsHTML += `<div style="margin: 15px 0 10px; font-weight: 600;">区间${segIndex+1} (${seg.start}-${seg.end}年):</div>`;
+
+        // 对于更换年份区间，容量重置为100%
+        if (seg.type === "replacement") {
+            const year = seg.start;
+            // 容量保持率为100%（重置）
+            const capacityRetention = 1.0;
+
+           
+            const baseDischarge = nt * Q * 1000 * OEE_dec * capacityRetention * DOD_dec;
+            const actualDischarge = baseDischarge * n_es_dec;  // 实际放电量
+            totalDischarge += actualDischarge;
+
+         
+            const annualPowerLoss = pc * (1 - n_es_dec) * baseDischarge;
+
+            // 折现因子
+            const discountFactor = Math.pow(1 + r_dec, year);
+
+            // 电力损耗现值
+            powerLossPV += annualPowerLoss / discountFactor;
+
+            stepsHTML += `
+                <div style="margin-bottom: 8px;">
+                    第${year}年（更换后）: 容量保持率=100.00%,<br>
+
+                    放电量=${actualDischarge.toLocaleString('zh-CN', {maximumFractionDigits: 0})} kWh,<br>
+                    电力损耗=${annualPowerLoss.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元
+                </div>
+            `;
+        } else {
+            // 对于普通区间，逐年计算容量衰减
+            for (let year = seg.start; year <= seg.end; year++) {
+                // 该区间内已使用年数
+                const yearsUsed = year - seg.start + 1;
+
+                // 容量保持率 = 1 - DR × 已使用年数
+                let capacityRetention = 1 - DR_dec * yearsUsed;
+                if (capacityRetention < 0) capacityRetention = 0;
+
+
+                const baseDischarge = nt * Q * 1000 * OEE_dec * capacityRetention * DOD_dec;
+                const actualDischarge = baseDischarge * n_es_dec;  // 实际放电量
+                totalDischarge += actualDischarge;
+
+                // 修正：年电力损耗费用 (元) - 使用基础放电量计算损耗
+                const annualPowerLoss = pc * (1 - n_es_dec) * baseDischarge;
+
+                // 折现因子
+                const discountFactor = Math.pow(1 + r_dec, year);
+
+                // 电力损耗现值
+                powerLossPV += annualPowerLoss / discountFactor;
+
+                stepsHTML += `
+                    <div style="margin-bottom: 8px;">
+                        第${year}年: 使用年数=${yearsUsed},
+                        容量保持率=${(capacityRetention*100).toFixed(2)}%,
+
+                        放电量=${actualDischarge.toLocaleString('zh-CN', {maximumFractionDigits: 0})} kWh,
+                        电力损耗=${annualPowerLoss.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元
+                    </div>
+                `;
+            }
+        }
+    });
+
+        stepsHTML += `
+            <div style="margin-top: 15px; font-weight: 600;">
+                电力损耗现值总和: ${powerLossPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元
+            </div>
+            <div style="font-weight: 600;">
+                总放电量: ${totalDischarge.toLocaleString('zh-CN', {maximumFractionDigits: 0})} kWh
+            </div>
+            </div>
+        `;
+
+        // 计算运维费用现值
+        let omPV = 0;
+        for (let year = 1; year <= t; year++) {
+            const annualOM = initialInvestment * om_dec;
+            const discountFactor = Math.pow(1 + r_dec, year);
+            omPV += annualOM / discountFactor;
+        }
+
+        stepsHTML += `
+            <div class="step">
+                <span class="step-number">4</span><strong>运维费用现值:</strong><br> 每年运维费用 = 初始投资 × O&M(t) = ${initialInvestment.toLocaleString('zh-CN')} × ${om_dec} = ${(initialInvestment * om_dec).toLocaleString('zh-CN')} 元<br>
+                    现值总和 = Σ[年运维费用 / (1+r)<sup>t</sup>] (t=1 到 ${t}) =
+                    <span>${omPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元</span>
+
+            </div>
+        `;
+
+        // 计算更换费用现值
+        let replacementPV = 0;
+        stepsHTML += `<div class="step"><span class="step-number">5</span><strong>更换费用现值:</strong>`;
+
+        replacements.forEach((rep, index) => {
+            const {H, t_h} = rep;
+            if (t_h > 0 && t_h <= t) {
+                const repPV = (H * 10000) / Math.pow(1 + r_dec, t_h);
+                replacementPV += repPV;
+
+                stepsHTML += `
+                    <div style="margin: 10px 0;">
+                        更换事件${index+1}: H = ${H} 万元, t<sub>h</sub> = ${t_h} 年<br>
+                        现值 = H × 10000 / (1+r)<sup>t<sub>h</sub></sup> = ${H} × 10000 / (1+${r_dec.toFixed(4)})<sup>${t_h}</sup> =
+                        <span>${repPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元</span>
+                    </div>
+                `;
+            }
+        });
+
+        stepsHTML += `
+            <div style="font-weight: 600; margin-top: 10px;">
+                更换费用现值总和: ${replacementPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元
+            </div>
+            </div>
+        `;
+
+        // 计算残值现值
+        const salvagePV = (S_dec * initialInvestment) / Math.pow(1 + r_dec, t);
+
+        stepsHTML += `
+            <div class="step">
+                <span class="step-number">6</span>
+
+                    <strong>残值现值:</strong><br> S × 初始投资 / (1+r)<sup>T</sup> = ${S_dec} × ${initialInvestment.toLocaleString('zh-CN')} / (1+${r_dec.toFixed(4)})<sup>${t}</sup> =
+                    <span>${salvagePV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元</span>
+
+            </div>
+        `;
+
+        // 总成本
+        const totalCost = initialInvestment + powerLossPV + omPV + replacementPV - salvagePV;
+
+        stepsHTML += `
+            <div class="step">
+                <span class="step-number">7</span>
+
+                    <strong>总成本:</strong> 初始投资 + 电力损耗现值 + 运维现值 + 更换现值 - 残值现值<br>
+                    = ${initialInvestment.toLocaleString('zh-CN', {maximumFractionDigits: 0})} +
+                    ${powerLossPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} +
+                    ${omPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} +
+                    ${replacementPV.toLocaleString('zh-CN', {maximumFractionDigits: 0})} -
+                    ${salvagePV.toLocaleString('zh-CN', {maximumFractionDigits: 0})}<br>
+                    = <span>${totalCost.toLocaleString('zh-CN', {maximumFractionDigits: 0})} 元</span>
+
+            </div>
+        `;
+
+        // 计算LCOS
+        const lcos = totalCost / totalDischarge;
+
+        stepsHTML += `
+            <div class="step">
+                <span class="step-number">8</span>
+
+                    <strong>计算LCOS:</strong> 总成本 / 总放电量<br>
+                    = ${totalCost.toLocaleString('zh-CN', {maximumFractionDigits: 0})} / ${totalDischarge.toLocaleString('zh-CN', {maximumFractionDigits: 0})}<br>
+                    = <span>${lcos.toFixed(3)} 元/kWh</span>
+
+            </div>
+        `;
+
+        // 显示结果和计算步骤
+        document.getElementById('lcos-result').textContent = lcos.toFixed(3);
+        document.getElementById('calculation-steps').innerHTML = stepsHTML;
+    }
+
+    window.onload = function() {
+        applyPreset(1);
+        calculateLCOS();
+    };
+</script>
+</body>
+</html>
